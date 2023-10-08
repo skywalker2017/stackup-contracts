@@ -1,173 +1,67 @@
-![](https://i.imgur.com/lXhFOUv.png)
+# Bundler E2E tests
 
-# Getting Started
-
-Smart contracts for ERC-4337 account and paymaster implementations.
-
-## Table of contents
-
-- [Repository structure](#repository-structure)
-  - [Git Clone](#git-clone)
-  - [Sensible Defaults](#sensible-defaults)
-  - [VSCode Integration](#vscode-integration)
-  - [GitHub Actions](#github-actions)
-- [Usage](#usage)
-  - [Pre Requisites](#pre-requisites)
-  - [Compile](#compile)
-  - [TypeChain](#typechain)
-  - [Test](#test)
-  - [Lint Solidity](#lint-solidity)
-  - [Lint TypeScript](#lint-typescript)
-  - [Coverage](#coverage)
-  - [Report Gas](#report-gas)
-  - [Clean](#clean)
-  - [Deploy](#deploy)
-- [License](#license)
-- [Contact](#contact)
-
-# Repository structure
-
-This repository builds upon the following frameworks and libraries:
-
-- [Hardhat](https://github.com/nomiclabs/hardhat): compile, run and test smart contracts
-- [TypeChain](https://github.com/ethereum-ts/TypeChain): generate TypeScript bindings for smart contracts
-- [Ethers](https://github.com/ethers-io/ethers.js/): renowned Ethereum library and wallet implementation
-- [Solhint](https://github.com/protofire/solhint): code linter
-- [Solcover](https://github.com/sc-forks/solidity-coverage): code coverage
-- [Prettier Plugin Solidity](https://github.com/prettier-solidity/prettier-plugin-solidity): code formatter
-
-## Git Clone
-
-The account-abstraction directory in this repository uses git submodules to include
-[eth-infinitism/account-abstraction](https://github.com/eth-infinitism/account-abstraction) as a workspace. Make sure to
-include the `--recurse-submodules` flag in your git clone command.
-
-```bash
-git clone --recurse-submodules https://github.com/stackup-wallet/contracts.git
-```
-
-## Sensible Defaults
-
-This repository comes with sensible default configurations in the following files:
-
-```text
-├── .editorconfig
-├── .eslintignore
-├── .eslintrc.yml
-├── .gitignore
-├── .prettierignore
-├── .prettierrc.yml
-├── .solcover.js
-├── .solhint.json
-└── hardhat.config.ts
-```
-
-## VSCode Integration
-
-This repository is IDE agnostic, but for the best user experience, you may want to use it in VSCode alongside Nomic
-Foundation's [Solidity extension](https://marketplace.visualstudio.com/items?itemName=NomicFoundation.hardhat-solidity).
-
-## GitHub Actions
-
-All contracts will be linted and tested on every push and pull request made to the `main` branch.
+A repeatable set of E2E tests to automate QA checks for the bundler. This should be used in addition to the [bundler test suite](https://github.com/eth-infinitism/bundler-spec-tests).
 
 # Usage
 
-Below are some useful commands for development.
+Below are instructions on how to run a series of E2E tests to check that everything is working as expected. The tests will execute a collection of known transactions that cover a wide range of edge cases.
 
-## Pre Requisites
+## Prerequisites
 
-Before being able to run any command, you need to create a `.env` file and set a BIP-39 compatible mnemonic as an
-environment variable. You can follow the example in `.env.example`. If you don't already have a mnemonic, you can use
-this [website](https://iancoleman.io/bip39/) to generate one.
+The steps in the following section assumes that all these tools have been installed and ready to go.
 
-```sh
-cp .env.example .env
+- Node.JS >= 18
+- [Geth](https://geth.ethereum.org/docs/getting-started/installing-geth)
+
+## Setting the environment
+
+To reduce the impact of external factors, we'll run the E2E test using an isolated local instance of both geth and the bundler.
+
+First, we'll need to run a local instance of geth with the following command:
+
+```bash
+geth \
+  --http.vhosts '*,localhost,host.docker.internal' \
+  --http \
+  --http.api eth,net,web3,debug \
+  --http.corsdomain '*' \
+  --http.addr "0.0.0.0" \
+  --nodiscover --maxpeers 0 --mine \
+  --networkid 1337 \
+  --dev \
+  --allow-insecure-unlock \
+  --rpc.allow-unprotected-txs \
+  --miner.gaslimit 12000000
+```
+```bash
+docker run -it -p 8545:8545 -p 30303:30303 ethereum/client-go --http.vhosts '*,localhost,host.docker.internal' --http --http.api eth,net,web3,debug --http.corsdomain '*' --http.addr "0.0.0.0" --nodiscover --maxpeers 0 --mine --networkid 1337 --dev --allow-insecure-unlock --rpc.allow-unprotected-txs --miner.gaslimit 12000000 
 ```
 
-Then, proceed with installing dependencies:
+In a separate process, navigate to the [eth-infinitism/account-abstraction](https://github.com/eth-infinitism/account-abstraction/) directory and run the following command to deploy the required contracts:
 
-```sh
-yarn install
+```bash
+yarn deploy --network localhost
 ```
 
-## Compile
+Next, navigate to the [stackup-wallet/contracts](https://github.com/stackup-wallet/contracts) directory and run the following command to deploy the supporting test contracts:
 
-Compile the smart contracts with Hardhat:
-
-```sh
-yarn run compile
+```bash
+yarn deploy:AllTest --network localhost
 ```
 
-## TypeChain
+Lastly, run the bundler with the following config:
 
-Compile the smart contracts and generate TypeChain bindings:
-
-```sh
-yarn run typechain
+```
+ERC4337_BUNDLER_ETH_CLIENT_URL=http://localhost:8545
+ERC4337_BUNDLER_PRIVATE_KEY=c6cbc5ffad570fdad0544d1b5358a36edeb98d163b6567912ac4754e144d4edb
+ERC4337_BUNDLER_MAX_BATCH_GAS_LIMIT=12000000
+ERC4337_BUNDLER_DEBUG_MODE=true
 ```
 
-## Test
+## Running the test suite
 
-Run the tests with Hardhat:
+Assuming you have your environment properly setup, you can use the following commands to run the QA test suite.
 
-```sh
+```bash
 yarn run test
 ```
-
-## Lint Solidity
-
-Lint the Solidity code:
-
-```sh
-yarn run lint:sol
-```
-
-## Lint TypeScript
-
-Lint the TypeScript code:
-
-```sh
-yarn run lint:ts
-```
-
-## Coverage
-
-Generate the code coverage report:
-
-```sh
-yarn run coverage
-```
-
-## Report Gas
-
-See the gas usage per unit test and average gas per method call:
-
-```sh
-REPORT_GAS=true yarn run test
-```
-
-## Clean
-
-Delete the smart contract artifacts, the coverage reports and the Hardhat cache:
-
-```sh
-yarn run clean
-```
-
-## Deploy
-
-Deploy the contracts to Hardhat Network:
-
-```sh
-yarn run deploy:VerifyingPaymaster
-```
-
-# License
-
-Distributed under the GPL-3.0 License. See [LICENSE](./LICENSE.md) for more information.
-
-# Contact
-
-Feel free to direct any technical related questions to the `dev-hub` channel in the
-[Stackup Discord](https://discord.gg/VTjJGvMNyW).

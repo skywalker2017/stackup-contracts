@@ -1,96 +1,33 @@
 {
-  "name": "@stackup-wallet/contracts",
-  "description": "Smart contracts for ERC-4337 account and paymaster implementations.",
+  "name": "e2e",
   "version": "1.0.0",
+  "description": "A repeatable set of E2E tests for automating QA checks on the bundler",
+  "repository": "git@github.com:stackup-wallet/stackup-bundler.git",
   "private": true,
-  "author": {
-    "name": "stackup-wallet",
-    "url": "https://github.com/stackup-wallet"
-  },
-  "workspaces": [
-    "account-abstraction"
-  ],
-  "devDependencies": {
-    "@ethersproject/abi": "^5.7.0",
-    "@ethersproject/abstract-provider": "^5.7.0",
-    "@ethersproject/abstract-signer": "^5.7.0",
-    "@ethersproject/bignumber": "^5.7.0",
-    "@ethersproject/bytes": "^5.7.0",
-    "@ethersproject/providers": "^5.7.2",
-    "@nomicfoundation/hardhat-chai-matchers": "^1.0.6",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
-    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
-    "@nomiclabs/hardhat-ethers": "^2.2.1",
-    "@nomiclabs/hardhat-etherscan": "^3.1.2",
-    "@trivago/prettier-plugin-sort-imports": "^4.0.0",
-    "@typechain/ethers-v5": "^10.1.1",
-    "@typechain/hardhat": "^6.1.4",
-    "@types/chai": "^4.3.4",
-    "@types/fs-extra": "^11.0.1",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "^18.11.9",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "chai": "^4.3.7",
-    "cross-env": "^7.0.3",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.37.0",
-    "eslint-config-prettier": "^8.8.0",
-    "ethers": "^5.7.2",
-    "fs-extra": "^11.1.1",
-    "hardhat": "^2.13.0",
-    "hardhat-deploy": "^0.11.25",
-    "hardhat-gas-reporter": "^1.0.9",
-    "lodash": "^4.17.21",
-    "mocha": "^10.2.0",
-    "prettier": "^2.8.7",
-    "prettier-plugin-solidity": "^1.1.3",
-    "rimraf": "^4.4.1",
-    "solhint": "^3.4.0",
-    "solhint-plugin-prettier": "^0.0.5",
-    "solidity-coverage": "^0.8.2",
-    "ts-generator": "^0.1.1",
-    "ts-node": "^10.9.1",
-    "typechain": "^8.1.1",
-    "typescript": "^5.0.3"
-  },
-  "files": [
-    "/contracts"
-  ],
-  "keywords": [
-    "blockchain",
-    "ethers",
-    "ethereum",
-    "hardhat",
-    "smart-contracts",
-    "solidity",
-    "template",
-    "typescript",
-    "typechain"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
-    "clean": "rimraf ./artifacts ./cache ./coverage ./types ./coverage.json",
-    "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
-    "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && yarn typechain",
-    "deploy:VerifyingPaymaster": "RUN_ONLY=1 hardhat deploy",
-    "deploy:6DecimalTestToken": "RUN_ONLY=2 DECIMALS=6 NAME='Stackup 6 Decimal Test Token' SYMBOL='6TEST' hardhat deploy",
-    "deploy:TestGas": "RUN_ONLY=3 hardhat deploy",
-    "deploy:AllTest": "RUN_ONLY=2,3,4 DECIMALS=6 NAME='Stackup 6 Decimal Test Token' SYMBOL='6TEST' hardhat deploy",
-    "verify": "hardhat verify",
-    "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
-    "lint:sol": "solhint --max-warnings 0 \"contracts/**/*.sol\"",
-    "lint:ts": "eslint --ignore-path ./.eslintignore --ext .js,.ts .",
-    "postinstall": "DOTENV_CONFIG_PATH=./.env.example yarn typechain && yarn postinstall:aa",
-    "postinstall:aa": "yarn workspace accountabstraction compile",
-    "prettier:check": "prettier --check \"**/*.{js,json,md,sol,ts,yml}\"",
-    "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
-    "test": "hardhat test",
-    "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
+    "lint": "eslint . && tsc --noEmit",
+    "lint:fix": "eslint . --fix",
+    "prettier": "prettier --check --ignore-path ./.eslintignore '**'",
+    "prettier:fix": "prettier --write --ignore-path ./.eslintignore '**'",
+    "test": "jest --runInBand"
   },
-  "resolutions": {
-    "@solidity-parser/parser": "0.16.0"
+  "dependencies": {
+    "ethers": "^5.7.2",
+    "userop": "^0.3.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.2",
+    "@types/node": "^18.11.9",
+    "@types/prettier": "^2.7.1",
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
+    "@typescript-eslint/parser": "^5.44.0",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "jest": "^29.6.1",
+    "prettier": "^2.8.0",
+    "ts-jest": "^29.1.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.3"
   }
 }
